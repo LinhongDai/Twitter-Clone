@@ -25,7 +25,8 @@ const app = express();
 const PORT = process.env.PORT || 6000;
 console.log(process.env.MONGO_URI);
 
-app.use(express.json()); // to parse the req.body
+app.use(express.json({limit: "5mb"})); // to parse the req.body
+// limit shouldn't be too high to prevent DOS
 app.use(express.urlencoded({ extented: true})); // to parse from data(urlencoded)
  
 app.use(cookieParser()); // to parse the cookie
