@@ -20,6 +20,8 @@ const Posts = ({feedType}) => {
 	// get a url based on the return type
 	const POST_ENDPOINT = getPostEndpoint();
 
+
+	// fetch data based on the end point (all or following)
 	const {data: posts, isLoading, refetch, isRefetching} = useQuery({
 		queryKey: ["posts"],
 		queryFn: async () => {
@@ -54,6 +56,7 @@ const Posts = ({feedType}) => {
 			{!isLoading && !isRefetching && posts?.length === 0 && <p className='text-center my-4'>No posts in this tab. Switch 👻</p>}
 			{!isLoading && !isRefetching && posts && (
 				<div>
+					{/* 得到了posts的数据，一个一个的map到post component中 */}
 					{posts.map((post) => (
 						<Post key={post._id} post={post} />
 					))}
