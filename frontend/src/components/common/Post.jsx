@@ -8,11 +8,17 @@ import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import LoadingSpinner from './LoadingSpinner';
+import { formatPostDate } from "../../utils/date";
 
 const Post = ({ post }) => {
 	const [comment, setComment] = useState("");
 	const {data:authUser} = useQuery({queryKey: ['authUser']});
 	const queryClient = useQueryClient();
+
+	const postOwner = post.user;
+	const isLiked = post.likes.includes(authUser._id);
+	const isMyPost = authUser._id === postOwner._id;
+	const formattedDate = formatPostDate(post.createdAt);
 
 	const {mutate: deletePost, isPending: isDeleting} = useMutation({
 		mutationFn: async() => {
@@ -57,7 +63,7 @@ const Post = ({ post }) => {
 
 			// this is not the best UX, cuz it will fetch all posts
 			// queryClient.invalidateQueries({queryKey: ["posts"]})
-			
+
 			// instead, update the cache directly for that post
 			queryClient.setQueryData(["posts"], (oldData) => {
 				return oldData.map(p => {
@@ -73,14 +79,45 @@ const Post = ({ post }) => {
 			toast.error(error.message);
 		}
 	})
-	const postOwner = post.user;
-	const isLiked = post.likes.includes(authUser._id);
 
-	const isMyPost = authUser._id === postOwner._id;
-
-	const formattedDate = "1h";
-
-	const isCommenting = true;
+	const {mutate: commentPost, isPending: isCommenting} = useMutation({
+		mutationFn: async () => {
+			try {
+				const res = await fetch(`/api/posts/comment/${post._id}`, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({ text: comment }),
+				})
+				const data = await res.json();
+				if (!res.ok) {
+					throw new Error(data.error || "Something went wrong");
+				}
+				return data;
+			} catch (error) {
+				throw new Error(error)
+			}
+		},
+		onSuccess: (updatedComments) => {
+			toast.success("Comment posted successfully");
+			setComment("");
+			// queryClient.invalidateQueries({ queryKey: ["posts"] });
+			queryClient.setQueryData(["posts"], (oldData) => {
+				return oldData.map((p) => {
+					// 如果进行了点赞/取消点赞的动作，那么map依次检查当前post的id和老
+					if (p._id === post._id) {
+						return {...p, comments: updatedComments};
+					}
+					return p;
+				})
+			})
+		},
+		onError: () => {
+			toast.error(error.message);
+		}
+	})
+	
 
 	const handleDeletePost = () => {
 		deletePost();
@@ -88,6 +125,8 @@ const Post = ({ post }) => {
 
 	const handlePostComment = (e) => {
 		e.preventDefault();
+		if (isCommenting) return;
+		commentPost();
 	};
 
 	const handleLikePost = () => {
