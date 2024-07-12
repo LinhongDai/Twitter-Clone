@@ -44,6 +44,7 @@ const RightPanel = () => {
 					)}
 					{!isLoading &&
 						suggestedUsers?.map((user) => (
+							// 点击就会跳转到profile中去
 							<Link
 								to={`/profile/${user.username}`}
 								className='flex items-center justify-between gap-4'
