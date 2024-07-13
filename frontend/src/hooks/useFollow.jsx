@@ -9,22 +9,22 @@ const useFollow = () => {
         mutationFn: async(userId) => {
             try {
                 const res = await fetch(`/api/users/follow/${userId}`, {
-                    method: 'POST',
-                })
+                    method: "POST",
+                });
 
                 const data = await res.json();
                 if (!res.ok) {
-                    throw new Error(data.message || "Something went wrong!");
+                    throw new Error(data.error || "Something went wrong!");
                 }
                 return data
             } catch (error) {
-                throw new Error(error);
+                throw new Error(error.message);
             }
         },
         onSuccess: () => {
             Promise.all([
                 queryClient.invalidateQueries({ queryKey: ["suggestedUsers"] }),
-                queryClient.invalidateQueries({ queryKey: ['authUser'] }),
+                queryClient.invalidateQueries({ queryKey: ["authUser"] }),
             ])
         },
         onError: (error) => {

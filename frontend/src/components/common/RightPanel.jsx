@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
-import useFollow from "../../hooks/useFollow";
+import useFollow from "../../hooks/useFollow.jsx";
 
 import RightPanelSkeleton from "../skeletons/RightPanelSkeleton";
 import LoadingSpinner from './LoadingSpinner';
@@ -12,10 +12,10 @@ const RightPanel = () => {
 		queryKey: ["suggestedUsers"],
 		queryFn: async () => {
 			try {
-				const res = await fetch("api/users/suggested");
+				const res = await fetch("/api/users/suggested");
 				const data = await res.json();
 				if (!res.ok) {
-					throw new Error(data.message || "Something went wrong!");
+					throw new Error(data.error || "Something went wrong!");
 				}
 				return data;
 			} catch (error) {
