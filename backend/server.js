@@ -26,7 +26,7 @@ const app = express();
 const PORT = process.env.PORT || 8000;
 const __dirname = path.resolve();
 
-app.use(express.json({limit: "500mb"})); // to parse the req.body
+app.use(express.json({limit: "30mb"})); // to parse the req.body
 // limit shouldn't be too high to prevent DOS
 app.use(express.urlencoded({ extented: true})); // to parse from data(urlencoded)
  
